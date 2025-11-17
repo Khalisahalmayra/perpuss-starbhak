@@ -12,7 +12,6 @@ export default function KategoriPage() {
   const [selectedKategori, setSelectedKategori] = useState("Semua");
   const [kategoriList, setKategoriList] = useState([]);
 
-  // 🔹 Ambil kategori dari database
   useEffect(() => {
     const fetchKategori = async () => {
       const res = await fetch("/api/kategori");
@@ -29,7 +28,6 @@ export default function KategoriPage() {
     fetchKategori();
   }, []);
 
-  // 🔹 Ambil data buku dari database
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -44,7 +42,6 @@ export default function KategoriPage() {
     fetchData();
   }, []);
 
-  // 🔹 Filter buku berdasarkan kategori
   const handleFilter = (kategori) => {
     setSelectedKategori(kategori);
 
@@ -68,7 +65,7 @@ export default function KategoriPage() {
 
       <main className="flex-1 p-6 flex flex-col gap-6">
         
-        {/* 🔍 Search Bar */}
+
         <div className="flex items-center w-full max-w-md border border-gray-300 rounded-lg px-3 py-2">
           <input
             type="text"
@@ -78,7 +75,6 @@ export default function KategoriPage() {
           <IoSearch className="text-lg" />
         </div>
 
-        {/* 📚 Daftar Kategori Utama */}
         <div className="flex gap-4 overflow-x-auto pb-4">
           {kategoriList.map((kat, i) => (
             <button
@@ -102,10 +98,8 @@ export default function KategoriPage() {
           ))}
         </div>
 
-        {/* 📖 Koleksi Buku */}
         <section className="bg-white pt-4">
 
-          {/* 🔥 Kategori Buku */}
           <div className="flex gap-3 mb-4">
             {["Pelajaran", "Fiksi", "Non-Fiksi", "Novel"].map((kat) => (
               <button
@@ -137,7 +131,6 @@ export default function KategoriPage() {
                 >
                   <div className="w-full h-48 relative">
 
-                    {/* FIX UTAMA: unoptimized + fallback */}
                     <Image
                       src={book.img || "/no-image.png"}
                       alt={book.judul}

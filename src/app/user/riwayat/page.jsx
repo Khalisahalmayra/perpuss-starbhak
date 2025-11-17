@@ -39,12 +39,26 @@ export default function RiwayatPage() {
     setRiwayatData(updated);
   }, []);
 
+  const StatusBadge = ({ status }) => {
+    let color = "bg-gray-400";
+
+    if (status === "pending") color = "bg-yellow-400 text-black";
+    if (status === "dipinjam") color = "bg-blue-500 text-white";
+    if (status === "ditolak") color = "bg-red-500 text-white";
+    if (status === "selesai") color = "bg-green-500 text-white";
+
+    return (
+      <span className={`px-3 py-1 text-xs rounded-full font-semibold ${color}`}>
+        {status.toUpperCase()}
+      </span>
+    );
+  };
+
   return (
     <div className="flex min-h-screen bg-white">
       <Sidebar />
 
       <main className="flex-1 p-6">
-
         <div className="flex items-center w-full max-w-lg border border-gray-300 rounded-lg px-3 py-2 mb-8">
           <input
             type="text"
@@ -61,7 +75,6 @@ export default function RiwayatPage() {
         {riwayatData.map((item, index) => (
           <div key={index} className="flex gap-5 items-start mb-8">
 
-            {/* FIX GAMBAR — WAJIB ADA unoptimized */}
             <Image
               src={item.img || "/default-book.png"}
               width={110}
@@ -72,11 +85,17 @@ export default function RiwayatPage() {
             />
 
             <div className="leading-relaxed text-sm">
-              <h3 className="font-semibold text-[16px]">{item.title}</h3>
+              <div className="flex items-center gap-3 mb-1">
+                <h3 className="font-semibold text-[16px]">{item.title}</h3>
+
+                <StatusBadge status={item.status || "pending"} />
+              </div>
+
               <p className="text-gray-600">{item.author}</p>
 
               <p className="mt-2 text-gray-700">
-                KAMU MEMINJAM BUKU <span className="font-semibold">{item.title}</span>
+                KAMU MEMINJAM BUKU{" "}
+                <span className="font-semibold">{item.title}</span>
               </p>
 
               <p className="mt-3 text-green-600 font-semibold">

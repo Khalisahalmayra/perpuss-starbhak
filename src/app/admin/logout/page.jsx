@@ -14,7 +14,6 @@ export default function LogoutPage() {
     <div className="w-full h-screen flex items-center justify-center bg-gray-100">
       <div className="bg-white w-[480px] p-10 rounded-xl shadow-lg">
 
-        {/* Icon User */}
         <div className="flex justify-center mb-6">
           <div className="w-32 h-32 rounded-full border-2 border-gray-300 flex items-center justify-center">
             <svg
@@ -28,12 +27,10 @@ export default function LogoutPage() {
           </div>
         </div>
 
-        {/* Text */}
         <p className="text-center text-xl font-semibold mb-6">
           kamu yakin ingin keluar akun sekarang?
         </p>
 
-        {/* Buttons */}
         <div className="flex gap-4 justify-center">
           <button
             onClick={handleLogout}

@@ -24,13 +24,11 @@ export default function HomePage() {
 
       <main className="flex-1 p-6 flex flex-col gap-6">
         
-        {/* Search */}
         <div className="flex items-center w-full max-w-md border border-gray-300 rounded-lg px-3 py-2">
           <input type="text" placeholder="Search" className="flex-1 outline-none text-sm" />
           <IoSearch className="text-lg" />
         </div>
 
-        {/* Welcome Box */}
         <div className="bg-[#5D80B6] text-white rounded-lg p-6 max-w-4xl">
           <h2 className="font-bold text-sm md:text-base">
             SELAMAT DATANG, PHAM HANNI !
@@ -47,7 +45,6 @@ export default function HomePage() {
           </Link>
         </div>
 
-        {/* Buku Terbaru */}
         <section className="bg-white pt-4">
           <div className="mb-6">
             <h2 className="text-lg md:text-xl font-semibold flex items-center gap-2">
@@ -65,12 +62,12 @@ export default function HomePage() {
                   className="bg-white rounded-xl shadow hover:shadow-lg transition p-3 cursor-pointer block"
                 >
                   <Image
-                    src={book.img}             // 🔥 AMBIL LANGSUNG DARI DATABASE
+                    src={book.img}             
                     alt={book.judul}
                     width={180}
                     height={250}
                     className="rounded-lg w-full object-cover"
-                    unoptimized                 // 🔥 WAJIB kalau pakai URL eksternal
+                    unoptimized                 
                   />
 
                   <p className="mt-2 text-[11px] font-semibold leading-snug line-clamp-2">
@@ -90,7 +87,6 @@ export default function HomePage() {
           )}
         </section>
 
-        {/* Banner Coming Soon */}
         <div className="bg-[#5D80B6] rounded-lg p-6 flex items-center justify-between text-white">
           <div>
             <p className="font-bold text-sm md:text-base tracking-wide uppercase">

@@ -16,7 +16,7 @@ export default function Register() {
 
   const [message, setMessage] = useState({
     text: "",
-    type: "", // "success" or "error"
+    type: "", 
   });
 
   const [loading, setLoading] = useState(false);
@@ -57,7 +57,7 @@ export default function Register() {
 
   return (
     <div className="min-h-screen flex flex-col md:flex-row bg-white">
-      {/* BAGIAN KIRI */}
+
       <div className="md:w-4/12 w-full flex items-center justify-center bg-gray-50 p-8">
         <Image
           src="/Group 29.png"
@@ -68,14 +68,12 @@ export default function Register() {
         />
       </div>
 
-      {/* BAGIAN KANAN */}
       <div className="md:w-7/12 w-full flex items-center justify-center px-8 py-10">
         <form onSubmit={handleSubmit} className="w-full max-w-md">
           <h2 className="text-xl md:text-2xl font-bold mb-6 text-center">
             Buat Akun Anda
           </h2>
 
-          {/* NOTIFICATION */}
           {message.text && (
             <div
               className={`mb-4 p-3 rounded-lg text-sm ${

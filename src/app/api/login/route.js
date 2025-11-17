@@ -6,14 +6,12 @@ export async function POST(req) {
     const body = await req.json();
     const { email, password } = body;
 
-    // Validasi input
     if (!email || !password) {
       return new Response(JSON.stringify({ message: "Email dan password wajib diisi" }), {
         status: 400,
       });
     }
 
-    // Cek apakah user ada
     const [rows] = await connection.execute("SELECT * FROM users WHERE email = ?", [email]);
 
     if (rows.length === 0) {
@@ -22,13 +20,11 @@ export async function POST(req) {
 
     const user = rows[0];
 
-    // Cek password
     const match = await bcrypt.compare(password, user.password);
     if (!match) {
       return new Response(JSON.stringify({ message: "Password salah" }), { status: 401 });
     }
 
-    // Jangan kirim password ke frontend
     const { password: _, ...safeUser } = user;
 
     return new Response(

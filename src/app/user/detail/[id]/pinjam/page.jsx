@@ -39,60 +39,76 @@ export default function PinjamBukuPage() {
   batasWaktu.setDate(today.getDate() + hari);
   const formattedBatas = batasWaktu.toLocaleDateString("id-ID");
 
-  const handleKonfirmasi = () => {
-    // -------------------
-    //  DATA RIWAYAT
-    // -------------------
-    const dataPinjam = {
-      id: buku.id,
-      img: buku.img || "/default-book.png",
-      title: buku.judul,
-      author: buku.penulis,
-      tanggalPinjam: formattedToday,
-      batasKembali: formattedBatas,
-      hariPeminjaman: hari,
-    };
+  const handleKonfirmasi = async () => {
+    try {
+      const res = await fetch("/api/peminjaman", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          user_id: 1, 
+          buku_id: buku.id,
+          tanggal_pinjam: today.toISOString().split("T")[0],
+          lama_pinjam: hari,
+        }),
+      });
 
-    const riwayat = JSON.parse(localStorage.getItem("riwayat_pinjam") || "[]");
-    riwayat.push(dataPinjam);
-    localStorage.setItem("riwayat_pinjam", JSON.stringify(riwayat));
+      const data = await res.json();
 
-    // -------------------
-    //  DATA NOTIFIKASI
-    // -------------------
-    const notifikasi = {
-      id: buku.id,
-      img: buku.img || "/default-book.png",
-      title: buku.judul,
-      author: buku.penulis,
-      message: `Kamu meminjam buku "${buku.judul}".`,
-      tanggal: formattedToday,
-      batasKembali: formattedBatas,
-      type: "peminjaman",
-    };
+      if (!res.ok) {
+        console.log("Gagal mengajukan peminjaman:", data.message);
+        return;
+      }
 
-    const notifList = JSON.parse(localStorage.getItem("notifikasi_pinjam") || "[]");
-    notifList.unshift(notifikasi);
-    localStorage.setItem("notifikasi_pinjam", JSON.stringify(notifList));
+      const dataPinjam = {
+        id: buku.id,
+        img: buku.img || "/default-book.png",
+        title: buku.judul,
+        author: buku.penulis,
+        tanggalPinjam: formattedToday,
+        batasKembali: formattedBatas,
+        hariPeminjaman: hari,
+        status: "pending",
+      };
 
-    router.push("/user/riwayat");
+      const riwayat = JSON.parse(localStorage.getItem("riwayat_pinjam") || "[]");
+      riwayat.unshift(dataPinjam);
+      localStorage.setItem("riwayat_pinjam", JSON.stringify(riwayat));
+
+      const notifikasi = {
+        id: buku.id,
+        img: buku.img || "/default-book.png",
+        title: buku.judul,
+        author: buku.penulis,
+        message: `Peminjaman buku "${buku.judul}" sedang menunggu persetujuan admin.`,
+        tanggal: formattedToday,
+        batasKembali: formattedBatas,
+        type: "pending",
+      };
+
+      const notifList = JSON.parse(localStorage.getItem("notifikasi_pinjam") || "[]");
+      notifList.unshift(notifikasi);
+      localStorage.setItem("notifikasi_pinjam", JSON.stringify(notifList));
+
+      router.push("/user/riwayat?status=success");
+
+    } catch (error) {
+      console.error("Terjadi kesalahan:", error);
+    }
   };
 
   return (
     <div className="min-h-screen bg-white flex justify-center items-start p-10">
       <div className="flex gap-12 max-w-4xl w-full">
 
-        {/* Gambar Buku */}
         <Image
           src={buku.img || "/default-book.png"}
           width={300}
           height={320}
-          unoptimized        // ✔ FIX ERROR GAMBAR
+          unoptimized
           alt="cover"
           className="rounded-lg shadow-md"
         />
 
-        {/* Detail */}
         <div className="max-w-lg text-[14px] leading-relaxed">
           <h2 className="text-xl font-bold mb-1">{buku.judul}</h2>
           <p className="text-gray-600 mb-4">{buku.penulis}</p>
@@ -125,7 +141,7 @@ export default function PinjamBukuPage() {
 
             <div className="flex gap-4 mt-8">
               <Link
-                href={`/detail/${id}`}
+                href={`/user/detail/${id}`}
                 className="border border-gray-500 px-4 py-2 rounded hover:bg-gray-200"
               >
                 Kembali

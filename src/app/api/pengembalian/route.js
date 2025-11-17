@@ -26,12 +26,10 @@ export async function POST(req) {
       );
     }
 
-    // hitung lama pinjam
     const pinjam = new Date(peminjaman[0].tanggal_pinjam);
     const kembali = new Date(tanggalKembali);
     const selisihHari = Math.ceil((kembali - pinjam) / (1000 * 60 * 60 * 24));
 
-    // update tabel peminjaman
     await connection.execute(
       `UPDATE peminjaman 
        SET tanggal_kembali=?, lama_pinjam=?
@@ -39,11 +37,10 @@ export async function POST(req) {
       [tanggalKembali, selisihHari, peminjaman_id]
     );
 
-    // masukkan ke tabel pengembalian
     await connection.execute(
       `INSERT INTO pengembalian (peminjaman_id, tanggal_dikembalikan, denda)
        VALUES (?, ?, ?)`,
-      [peminjaman_id, tanggalKembali, 0] // denda = 0 default
+      [peminjaman_id, tanggalKembali, 0] 
     );
 
     return NextResponse.json({ message: "Buku berhasil dikembalikan" });

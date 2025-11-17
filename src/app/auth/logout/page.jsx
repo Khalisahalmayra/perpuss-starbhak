@@ -7,12 +7,11 @@ export default function LogoutPage() {
   const router = useRouter();
 
   const handleLogout = () => {
-    // Hapus session/token di sini nanti
-    router.push("/"); // pindah ke landing page
+    router.push("/"); 
   };
 
   const cancelLogout = () => {
-    router.back(); // kembali ke halaman sebelumnya
+    router.back(); 
   };
 
   return (

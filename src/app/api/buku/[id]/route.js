@@ -1,4 +1,4 @@
-import connection from "@/app/lib/database";
+import connection from "@/lib/database";
 import { NextResponse } from "next/server";
 
 export async function GET(req, context) {
@@ -34,10 +34,6 @@ export async function GET(req, context) {
     );
   }
 }
-
-// =============================
-//       DELETE BUKU
-// =============================
 
 export async function DELETE(req, context) {
   try {

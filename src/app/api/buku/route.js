@@ -1,8 +1,5 @@
-import connection from "../../lib/database";
+import connection from "@/lib/database";
 
-// =========================
-// GET → Ambil semua buku
-// =========================
 export async function GET(req) {
   try {
     const { searchParams } = new URL(req.url);
@@ -30,10 +27,6 @@ export async function GET(req) {
   }
 }
 
-
-// =========================
-// POST → Tambah buku
-// =========================
 export async function POST(req) {
   try {
     const body = await req.json();
@@ -61,10 +54,6 @@ export async function POST(req) {
   }
 }
 
-
-// =========================
-// PUT → Update buku
-// =========================
 export async function PUT(req) {
   try {
     const body = await req.json();
@@ -87,7 +76,10 @@ export async function PUT(req) {
   } catch (error) {
     console.error("SQL ERROR PUT:", error);
     return new Response(
-      JSON.stringify({ message: "Gagal mengupdate buku", error: error.message }),
+      JSON.stringify({
+        message: "Gagal mengupdate buku",
+        error: error.message
+      }),
       { status: 500 }
     );
   }

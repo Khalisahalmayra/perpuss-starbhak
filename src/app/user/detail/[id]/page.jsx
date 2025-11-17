@@ -12,10 +12,9 @@ export default function DetailBukuPage() {
   const [buku, setBuku] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  // NOTIF STATE
   const [notif, setNotif] = useState({
     text: "",
-    type: "", // success | error
+    type: "", 
   });
 
   useEffect(() => {
@@ -37,9 +36,6 @@ export default function DetailBukuPage() {
   if (loading) return <p className="p-8">Memuat detail buku...</p>;
   if (!buku) return <p className="p-8">Buku tidak ditemukan.</p>;
 
-  // ------------------------------
-  // ❤️  WISHLIST FUNCTION
-  // ------------------------------
   const handleAddWishlist = () => {
     if (!buku || !buku.id) {
       setNotif({ text: "Data buku tidak valid!", type: "error" });
@@ -71,7 +67,6 @@ export default function DetailBukuPage() {
 
     setNotif({ text: "Buku berhasil ditambahkan ke Wishlist!", type: "success" });
 
-    // Auto-hide notif
     setTimeout(() => {
       setNotif({ text: "", type: "" });
     }, 1500);
@@ -82,14 +77,14 @@ export default function DetailBukuPage() {
       <Sidebar />
 
       <main className="flex-1 p-8">
-        {/* Search */}
+
         <div className="flex items-center w-full max-w-md border border-gray-300 rounded-lg px-3 py-2 mb-8">
           <input className="flex-1 outline-none text-sm" placeholder="Cari buku..." />
           <IoSearch className="text-lg" />
         </div>
 
         <div className="flex flex-col md:flex-row gap-10">
-          {/* Gambar */}
+
           <div className="relative w-64 h-80 flex-shrink-0 border rounded-lg shadow-md overflow-hidden">
             <Image
               src={buku.img || "/default-book.png"}
@@ -108,7 +103,6 @@ export default function DetailBukuPage() {
               {buku.kategori || "-"}
             </span>
 
-            {/* NOTIFIKASI */}
             {notif.text && (
               <div
                 className={`p-3 mb-4 rounded-lg text-sm border ${
@@ -121,7 +115,6 @@ export default function DetailBukuPage() {
               </div>
             )}
 
-            {/* Tabel Detail */}
             <div className="overflow-hidden rounded-xl border border-gray-200 mb-6">
               <table className="w-full text-sm">
                 <tbody>
@@ -145,7 +138,6 @@ export default function DetailBukuPage() {
               </table>
             </div>
 
-            {/* Tombol */}
             <div className="flex justify-between mt-6">
               <button
                 onClick={handleAddWishlist}
@@ -164,7 +156,6 @@ export default function DetailBukuPage() {
           </div>
         </div>
 
-        {/* DESKRIPSI */}
         <div className="mt-10">
           <h2 className="text-lg font-semibold mb-3">Deskripsi</h2>
           <p className="text-gray-700 leading-relaxed max-w-3xl">

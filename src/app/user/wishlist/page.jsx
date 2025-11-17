@@ -9,13 +9,13 @@ import Link from "next/link";
 export default function WishlistPage() {
   const [wishlistBooks, setWishlistBooks] = useState([]);
 
-  // 🔥 Ambil data dari LocalStorage saat halaman dibuka
+  // ambil data dari LocalStorage saat halaman dibuka
   useEffect(() => {
     const saved = JSON.parse(localStorage.getItem("wishlist") || "[]");
     setWishlistBooks(saved);
   }, []);
 
-  // 🔥 Unwishlist (hapus dari wishlist)
+
   const handleUnwishlist = (id) => {
     const updated = wishlistBooks.filter((item) => item.id !== id);
     setWishlistBooks(updated);
@@ -27,7 +27,7 @@ export default function WishlistPage() {
       <Sidebar />
 
       <main className="flex-1 p-6">
-        {/* Search Bar */}
+        
         <div className="flex items-center w-full max-w-lg border border-gray-300 rounded-lg px-3 py-2 mb-6">
           <input
             type="text"
@@ -37,7 +37,6 @@ export default function WishlistPage() {
           <IoSearch className="text-lg" />
         </div>
 
-        {/* Wishlist Books Grid */}
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6">
           {wishlistBooks.length > 0 ? (
             wishlistBooks.map((book, index) => (
@@ -45,7 +44,7 @@ export default function WishlistPage() {
                 key={index}
                 className="relative bg-white rounded-xl shadow hover:shadow-md transition p-3"
               >
-                {/* ❤️ Unwishlist Button */}
+
                 <button
                   onClick={() => handleUnwishlist(book.id)}
                   className="absolute top-2 left-2 bg-white p-1 rounded-lg shadow"
@@ -53,7 +52,6 @@ export default function WishlistPage() {
                   ❤️
                 </button>
 
-                {/* Klik Card → Detail */}
                 <Link href={`/user/detail/${book.id}`}>
                   <Image
                     src={book.img}

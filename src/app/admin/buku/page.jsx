@@ -21,13 +21,11 @@ export default function BukuPage() {
     kategori: ""
   });
 
-  // Fungsi Notifikasi
   const showToast = (message, type = "success") => {
     setToast({ message, type });
     setTimeout(() => setToast(null), 3000);
   };
 
-  // Get All Buku
   const getBuku = async () => {
     const res = await fetch("/api/buku");
     const data = await res.json();
@@ -38,12 +36,27 @@ export default function BukuPage() {
     getBuku();
   }, []);
 
-  // Input Handler
+
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  // Submit (Tambah / Edit)
+  const handleEdit = (item) => {
+    setIsEdit(true);
+    setShowForm(true);
+
+    setFormData({
+      id: item.id,
+      img: item.img,
+      judul: item.judul,
+      penulis: item.penulis,
+      penerbit: item.penerbit,
+      tahun_terbit: item.tahun_terbit,
+      stok: item.stok,
+      kategori: item.kategori,
+    });
+  };
+
   const handleSubmit = async () => {
     const method = isEdit ? "PUT" : "POST";
 
@@ -67,7 +80,6 @@ export default function BukuPage() {
     getBuku();
   };
 
-  // ⭐ Delete Buku (Tanpa alert / confirm)
   const handleDelete = async (id) => {
     try {
       const res = await fetch(`/api/buku/${id}`, { method: "DELETE" });
@@ -77,7 +89,6 @@ export default function BukuPage() {
 
       showToast(result.message, "success");
       getBuku();
-
     } catch (error) {
       showToast("Gagal menghapus buku", "error");
     }
@@ -91,12 +102,9 @@ export default function BukuPage() {
       <div className="flex-1 p-8">
         <h2 className="text-xl font-bold mb-4">Daftar Buku</h2>
 
-        {/* Toast Notification */}
         {toast && (
-          <div
-            className={`fixed top-4 right-4 px-4 py-2 rounded shadow-lg text-white 
-            ${toast.type === "success" ? "bg-green-600" : "bg-red-600"}`}
-          >
+          <div className={`fixed top-4 right-4 px-4 py-2 rounded text-white shadow-lg
+            ${toast.type === "success" ? "bg-green-600" : "bg-red-600"}`}>
             {toast.message}
           </div>
         )}
@@ -166,7 +174,6 @@ export default function BukuPage() {
           </table>
         </div>
 
-        {/* FORM Pop-up */}
         {showForm && (
           <div className="fixed inset-0 bg-black bg-opacity-40 flex justify-center items-center">
             <div className="bg-white w-[450px] p-6 rounded-xl shadow-lg">
@@ -191,16 +198,19 @@ export default function BukuPage() {
                   value={formData.penerbit} onChange={handleChange}
                   className="border px-3 py-2 w-full rounded" />
 
-                <input name="tahun_terbit" type="number" placeholder="Tahun Terbit"
+                <input name="tahun_terbit" type="number"
                   value={formData.tahun_terbit} onChange={handleChange}
+                  placeholder="Tahun Terbit"
                   className="border px-3 py-2 w-full rounded" />
 
-                <input name="stok" type="number" placeholder="Stok"
+                <input name="stok" type="number"
                   value={formData.stok} onChange={handleChange}
+                  placeholder="Stok"
                   className="border px-3 py-2 w-full rounded" />
 
-                <input name="kategori" placeholder="Kategori"
+                <input name="kategori"
                   value={formData.kategori} onChange={handleChange}
+                  placeholder="Kategori"
                   className="border px-3 py-2 w-full rounded" />
               </div>
 

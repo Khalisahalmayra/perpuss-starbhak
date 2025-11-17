@@ -2,12 +2,14 @@
 
 import Link from "next/link";
 import Image from "next/image";
+import { usePathname } from "next/navigation";
 
 export default function AdminSidebar() {
+  const pathname = usePathname();
+
   return (
     <aside className="w-64 min-h-screen border-r border-gray-200 bg-white p-6">
-      
-      {/* Header */}
+
       <div className="flex items-center gap-3 mb-8">
         <Image
           src="/logo.png"
@@ -21,7 +23,6 @@ export default function AdminSidebar() {
         </h1>
       </div>
 
-      {/* Profile */}
       <div className="flex items-center gap-3 mb-10">
         <Image
           src="/profile.jpg"
@@ -36,28 +37,38 @@ export default function AdminSidebar() {
         </div>
       </div>
 
-      {/* Menu */}
       <nav className="space-y-4">
-        <Link href="/admin/dashboard">
-          <div className="flex items-center gap-3 p-3 rounded hover:bg-gray-100 cursor-pointer bg-gray-200">
+
+        <Link href="/admin/dasboard">
+          <div
+            className={`flex items-center gap-3 p-3 rounded cursor-pointer hover:bg-gray-100
+            ${pathname === "/admin/dasboard" ? "bg-gray-200" : ""}`}
+          >
             <span>📊</span>
             <p className="font-medium">Dashboard</p>
           </div>
         </Link>
 
         <Link href="/admin/buku">
-          <div className="flex items-center gap-3 p-3 rounded hover:bg-gray-100 cursor-pointer">
+          <div
+            className={`flex items-center gap-3 p-3 rounded cursor-pointer hover:bg-gray-100
+            ${pathname === "/admin/buku" ? "bg-gray-200" : ""}`}
+          >
             <span>📚</span>
             <p className="font-medium">Buku</p>
           </div>
         </Link>
 
         <Link href="/admin/logout">
-          <div className="flex items-center gap-3 p-3 rounded hover:bg-gray-100 cursor-pointer">
+          <div
+            className={`flex items-center gap-3 p-3 rounded cursor-pointer hover:bg-gray-100
+            ${pathname === "/admin/logout" ? "bg-gray-200" : ""}`}
+          >
             <span>🚪</span>
             <p className="font-medium">Logout</p>
           </div>
         </Link>
+
       </nav>
     </aside>
   );
