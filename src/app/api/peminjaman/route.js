@@ -1,25 +1,24 @@
-import connection from "../../lib/database";
+import pool from "@/lib/database";
 import { NextResponse } from "next/server";
 
-export async function POST(req) {
+export async function GET() {
   try {
-    const { user_id, buku_id, tanggal_pinjam, lama_pinjam } = await req.json();
-
-    const pinjamDate = new Date(tanggal_pinjam);
-    pinjamDate.setDate(pinjamDate.getDate() + Number(lama_pinjam));
-    const tanggal_kembali = pinjamDate.toISOString().split("T")[0];
-
-    const [result] = await connection.execute(
-      `INSERT INTO peminjaman (user_id, buku_id, tanggal_pinjam, tanggal_kembali, lama_pinjam, status) 
-       VALUES (?, ?, ?, ?, ?, 'pending')`,
-      [user_id, buku_id, tanggal_pinjam, tanggal_kembali, lama_pinjam]
+    const [rows] = await pool.execute(
+      `SELECT 
+        peminjaman.id,
+        peminjaman.tanggal_pinjam,
+        peminjaman.tanggal_kembali,
+        peminjaman.lama_pinjam,
+        peminjaman.status,
+        users.nama AS nama_user,
+        buku.judul AS judul_buku
+       FROM peminjaman
+       JOIN users ON peminjaman.user_id = users.id
+       JOIN buku ON peminjaman.buku_id = buku.id
+       ORDER BY peminjaman.id DESC`
     );
 
-    return NextResponse.json(
-      { message: "Peminjaman berhasil diajukan (pending)", id: result.insertId },
-      { status: 201 }
-    );
-
+    return NextResponse.json(rows, { status: 200 });
   } catch (error) {
     return NextResponse.json(
       { message: "Terjadi kesalahan", error: error.message },

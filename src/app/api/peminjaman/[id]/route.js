@@ -1,16 +1,19 @@
-import connection from "@/lib/database";
+import pool from "@/lib/database";
 import { NextResponse } from "next/server";
 
-export async function PUT(req, { params }) {
+export async function PATCH(req, { params }) {
   try {
     const { status } = await req.json();
 
-    await connection.execute(
+    await pool.execute(
       "UPDATE peminjaman SET status = ? WHERE id = ?",
       [status, params.id]
     );
 
-    return NextResponse.json({ message: "Status berhasil diperbarui" });
+    return NextResponse.json(
+      { message: "Status berhasil diperbarui" },
+      { status: 200 }
+    );
 
   } catch (error) {
     return NextResponse.json(
