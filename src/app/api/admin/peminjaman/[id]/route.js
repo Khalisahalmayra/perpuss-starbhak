@@ -1,17 +1,25 @@
-import connection from "@/app/lib/database";
+import pool from "@/lib/database";
 import { NextResponse } from "next/server";
 
 export async function PATCH(req, { params }) {
   try {
+    const { id } = params;
     const { status } = await req.json();
 
-    await connection.execute(
+    const [result] = await pool.execute(
       "UPDATE peminjaman SET status = ? WHERE id = ?",
-      [status, params.id]
+      [status, id]
     );
 
-    return NextResponse.json({ message: "Status updated" });
+    return NextResponse.json(
+      { message: "Status berhasil diperbarui", result },
+      { status: 200 }
+    );
   } catch (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    console.error("PATCH ERROR:", error);
+    return NextResponse.json(
+      { error: error.message },
+      { status: 500 }
+    );
   }
 }

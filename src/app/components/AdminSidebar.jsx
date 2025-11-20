@@ -4,6 +4,9 @@ import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
 
+// import icon lucide
+import { LayoutDashboard, BookOpen, LogOut } from "lucide-react";
+
 export default function AdminSidebar() {
   const pathname = usePathname();
 
@@ -44,7 +47,7 @@ export default function AdminSidebar() {
             className={`flex items-center gap-3 p-3 rounded cursor-pointer hover:bg-gray-100
             ${pathname === "/admin/dasboard" ? "bg-gray-200" : ""}`}
           >
-            <span>📊</span>
+            <LayoutDashboard size={18} />
             <p className="font-medium">Dashboard</p>
           </div>
         </Link>
@@ -54,7 +57,7 @@ export default function AdminSidebar() {
             className={`flex items-center gap-3 p-3 rounded cursor-pointer hover:bg-gray-100
             ${pathname === "/admin/buku" ? "bg-gray-200" : ""}`}
           >
-            <span>📚</span>
+            <BookOpen size={18} />
             <p className="font-medium">Buku</p>
           </div>
         </Link>
@@ -64,7 +67,7 @@ export default function AdminSidebar() {
             className={`flex items-center gap-3 p-3 rounded cursor-pointer hover:bg-gray-100
             ${pathname === "/admin/logout" ? "bg-gray-200" : ""}`}
           >
-            <span>🚪</span>
+            <LogOut size={18} />
             <p className="font-medium">Logout</p>
           </div>
         </Link>

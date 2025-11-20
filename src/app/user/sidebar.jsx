@@ -4,6 +4,16 @@ import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
+// Import icon lucide
+import {
+  Home,
+  BookOpen,
+  Heart,
+  Bell,
+  History,
+  LogOut,
+} from "lucide-react";
+
 export default function Sidebar() {
   const pathname = usePathname();
 
@@ -40,44 +50,44 @@ export default function Sidebar() {
         
         <Link
           href="/user/home"
-          className={`block py-2 px-3 rounded-lg hover:bg-gray-100 ${isActive("/user/home")}`}
+          className={`flex items-center gap-2 py-2 px-3 rounded-lg hover:bg-gray-100 ${isActive("/user/home")}`}
         >
-          🏠 Beranda
+          <Home size={18} /> Beranda
         </Link>
 
         <Link
           href="/user/kategori"
-          className={`block py-2 px-3 rounded-lg hover:bg-gray-100 ${isActive("/user/kategori")}`}
+          className={`flex items-center gap-2 py-2 px-3 rounded-lg hover:bg-gray-100 ${isActive("/user/kategori")}`}
         >
-          📚 Kategori
+          <BookOpen size={18} /> Kategori
         </Link>
 
         <Link
           href="/user/wishlist"
-          className={`block py-2 px-3 rounded-lg hover:bg-gray-100 ${isActive("/user/wishlist")}`}
+          className={`flex items-center gap-2 py-2 px-3 rounded-lg hover:bg-gray-100 ${isActive("/user/wishlist")}`}
         >
-          ❤️ Wishlist
+          <Heart size={18} /> Wishlist
         </Link>
 
         <Link
           href="/user/notification"
-          className={`block py-2 px-3 rounded-lg hover:bg-gray-100 ${isActive("/user/notification")}`}
+          className={`flex items-center gap-2 py-2 px-3 rounded-lg hover:bg-gray-100 ${isActive("/user/notification")}`}
         >
-          🔔 Notification
+          <Bell size={18} /> Notification
         </Link>
 
         <Link
           href="/user/riwayat"
-          className={`block py-2 px-3 rounded-lg hover:bg-gray-100 ${isActive("/user/riwayat")}`}
+          className={`flex items-center gap-2 py-2 px-3 rounded-lg hover:bg-gray-100 ${isActive("/user/riwayat")}`}
         >
-          📝 Riwayat Peminjaman
+          <History size={18} /> Riwayat Peminjaman
         </Link>
 
       </nav>
 
       <Link href="/logout">
-        <button className="flex items-center gap-3 text-red-500 font-semibold hover:text-red-600 mt-6 text-[15px] transition">
-          🚪 Logout
+        <button className="flex items-center gap-2 text-red-500 font-semibold hover:text-red-600 mt-6 text-[15px] transition">
+          <LogOut size={18} /> Logout
         </button>
       </Link>
 

@@ -98,7 +98,7 @@ export default function HomePage() {
           </div>
 
           <Image
-            src="/buku-comingsoon.jpg"
+            src="/untukmu.jpg"
             alt="Buku Coming Soon"
             width={90}
             height={140}

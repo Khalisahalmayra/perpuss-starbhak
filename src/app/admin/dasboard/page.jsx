@@ -9,37 +9,28 @@ export default function DashboardPage() {
   const [buku, setBuku] = useState([]);
   const [showModal, setShowModal] = useState(false);
   const [modalData, setModalData] = useState(null);
+  const [loading, setLoading] = useState(true);
 
   const fetchPeminjaman = async () => {
     try {
-      const res = await fetch("/api/admin/peminjaman");
+      const res = await fetch("/api/admin/peminjaman", {
+        cache: "no-store",
+      });
       const data = await res.json();
-
-      if (Array.isArray(data)) {
-        setPeminjaman(data);
-      } else if (Array.isArray(data.data)) {
-        setPeminjaman(data.data);
-      } else {
-        setPeminjaman([]);
-      }
+      setPeminjaman(Array.isArray(data) ? data : data.data || []);
     } catch (error) {
       console.error("Gagal mengambil data:", error);
       setPeminjaman([]);
+    } finally {
+      setLoading(false);
     }
   };
 
   const fetchBuku = async () => {
     try {
-      const res = await fetch("/api/buku");
+      const res = await fetch("/api/buku", { cache: "no-store" });
       const data = await res.json();
-
-      if (Array.isArray(data)) {
-        setBuku(data);
-      } else if (Array.isArray(data.data)) {
-        setBuku(data.data);
-      } else {
-        setBuku([]);
-      }
+      setBuku(Array.isArray(data) ? data : data.data || []);
     } catch (error) {
       console.error("Gagal mengambil data buku:", error);
       setBuku([]);
@@ -69,25 +60,32 @@ export default function DashboardPage() {
         : "";
 
     try {
-      await fetch(`/api/admin/peminjaman/${modalData.id}`, {
+      const res = await fetch(`/api/admin/peminjaman/${modalData.id}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
+        cache: "no-store",
         body: JSON.stringify({ status: newStatus }),
       });
+
+      const output = await res.json();
+      console.log("SERVER RESPONSE:", output);
+
+      if (!res.ok) {
+        alert("Gagal mengupdate status!\n" + (output.message || ""));
+        return;
+      }
 
       setShowModal(false);
       fetchPeminjaman();
     } catch (error) {
-      console.error("Gagal update status:", error);
+      console.error(error);
+      alert("Gagal mengupdate status!");
     }
   };
 
+  // --- Hitung statistik ---
   const totalDipinjam = peminjaman.filter((p) => p.status === "dipinjam").length;
-
-  const totalBelumDikembalikan = peminjaman.filter(
-    (p) => p.status === "dipinjam"
-  ).length;
-
+  const totalBelumDikembalikan = totalDipinjam;
   const totalSudahDikembalikan = peminjaman.filter(
     (p) => p.status === "dikembalikan"
   ).length;
@@ -99,11 +97,9 @@ export default function DashboardPage() {
 
   return (
     <div className="flex bg-white relative">
-
       <AdminSidebar />
 
       <div className="flex-1 p-8">
-
         <div className="flex justify-between items-center mb-6">
           <div className="relative w-96">
             <input
@@ -111,7 +107,7 @@ export default function DashboardPage() {
               placeholder="Search"
               className="border px-4 py-2 w-full rounded-md"
             />
-            <span className="absolute right-3 top-2.5">🔍</span>
+            <span className="absolute right-3 top-2.5"></span>
           </div>
         </div>
 
@@ -123,7 +119,6 @@ export default function DashboardPage() {
         </div>
 
         <div className="grid grid-cols-4 gap-4 mb-8">
-
           <div className="p-4 border rounded-lg bg-yellow-100">
             <p className="text-xs text-gray-600">Total Buku Dipinjam</p>
             <h3 className="font-bold text-xl">{totalDipinjam}</h3>
@@ -143,89 +138,90 @@ export default function DashboardPage() {
             <p className="text-xs text-gray-600">Sudah Dikembalikan</p>
             <h3 className="font-bold text-xl">{totalSudahDikembalikan}</h3>
           </div>
-
         </div>
 
         <h3 className="font-semibold mb-4">Aktivitas</h3>
 
-        <div className="space-y-4">
+        {loading ? (
+          <p className="text-sm text-gray-500 text-center">Memuat data...</p>
+        ) : (
+          <div className="space-y-4">
+            {peminjaman.map((item) => (
+              <div
+                key={item.id}
+                className="p-3 border rounded flex items-center gap-4"
+              >
+                <Image
+                  src={item.buku_img || "/no-book.jpg"}
+                  alt="foto buku"
+                  width={45}
+                  height={45}
+                  className="object-cover"
+                />
 
-          {peminjaman.map((item) => (
-            <div
-              key={item.id}
-              className="p-3 border rounded flex items-center gap-4"
-            >
-
-              <Image
-                src={item.buku_img || "/no-book.jpg"}
-                alt="foto buku"
-                width={45}
-                height={45}
-                className="object-cover"
-              />
-
-              <div>
-                <p className="text-sm font-medium">{item.buku_judul}</p>
-
-                <p className="text-xs mt-1">
-                  Status:{" "}
-                  <span
-                    className={`font-semibold ${
-                      item.status === "pending"
-                        ? "text-yellow-600"
-                        : item.status === "dipinjam"
-                        ? "text-blue-600"
-                        : item.status === "dikembalikan"
-                        ? "text-green-600"
-                        : "text-red-600"
-                    }`}
-                  >
-                    {item.status.toUpperCase()}
-                  </span>
-                </p>
-              </div>
-
-              {item.status === "pending" && (
-                <div className="ml-auto flex gap-2">
-                  <button
-                    onClick={() => openModal(item, "ambil")}
-                    className="text-xs p-2 bg-blue-200 rounded hover:bg-blue-300"
-                  >
-                    Konfirmasi Ambil
-                  </button>
-
-                  <button
-                    onClick={() => openModal(item, "tolak")}
-                    className="text-xs p-2 bg-red-200 text-red-700 rounded hover:bg-red-300"
-                  >
-                    Tolak
-                  </button>
+                <div>
+                  <p className="text-sm font-medium">
+                    {item.buku_judul || "Judul tidak tersedia"}
+                  </p>
+                  <p className="text-xs mt-1">
+                    Status:{" "}
+                    <span
+                      className={`font-semibold ${
+                        item.status === "pending"
+                          ? "text-yellow-600"
+                          : item.status === "dipinjam"
+                          ? "text-blue-600"
+                          : item.status === "dikembalikan"
+                          ? "text-green-600"
+                          : "text-red-600"
+                      }`}
+                    >
+                      {item.status?.toUpperCase()}
+                    </span>
+                  </p>
                 </div>
-              )}
 
-              {item.status === "dipinjam" && (
-                <button
-                  onClick={() => openModal(item, "kembali")}
-                  className="ml-auto text-xs p-2 bg-green-200 text-green-700 rounded hover:bg-green-300"
-                >
-                  Tandai Sudah Dikembalikan
-                </button>
-              )}
-            </div>
-          ))}
+                {item.status === "pending" && (
+                  <div className="ml-auto flex gap-2">
+                    <button
+                      onClick={() => openModal(item, "ambil")}
+                      className="text-xs p-2 bg-blue-200 rounded hover:bg-blue-300"
+                    >
+                      Konfirmasi Ambil
+                    </button>
 
-          {peminjaman.length === 0 && (
-            <p className="text-gray-600 text-sm text-center">
-              Tidak ada aktivitas peminjaman.
-            </p>
-          )}
-        </div>
+                    <button
+                      onClick={() => openModal(item, "tolak")}
+                      className="text-xs p-2 bg-red-200 text-red-700 rounded hover:bg-red-300"
+                    >
+                      Tolak
+                    </button>
+                  </div>
+                )}
+
+                {item.status === "dipinjam" && (
+                  <button
+                    onClick={() => openModal(item, "kembali")}
+                    className="ml-auto text-xs p-2 bg-green-200 text-green-700 rounded hover:bg-green-300"
+                  >
+                    Tandai Sudah Dikembalikan
+                  </button>
+                )}
+              </div>
+            ))}
+
+            {peminjaman.length === 0 && (
+              <p className="text-gray-600 text-sm text-center">
+                Tidak ada aktivitas peminjaman.
+              </p>
+            )}
+          </div>
+        )}
       </div>
 
       {showModal && modalData && (
         <div className="fixed inset-0 bg-black bg-opacity-40 flex justify-center items-center z-50">
           <div className="bg-white w-[400px] p-6 rounded-xl shadow-lg text-center">
-
             <div className="text-4xl mb-3">📘</div>
 
             <h2 className="text-lg font-bold">
@@ -241,7 +237,7 @@ export default function DashboardPage() {
             </p>
 
             <p className="text-sm">
-              Atas nama: <b>{modalData.user_nama}</b>
+              Atas nama: <b>{modalData.user_nama || "Tidak diketahui"}</b>
             </p>
 
             {modalData.action === "tolak" && (
@@ -269,7 +265,6 @@ export default function DashboardPage() {
                 Iya, Lanjutkan
               </button>
             </div>
-
           </div>
         </div>
       )}
