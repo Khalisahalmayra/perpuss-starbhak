@@ -1,9 +1,12 @@
 import pool from "@/lib/database";
 import { NextResponse } from "next/server";
 
+// GET - Ambil semua data peminjaman
 export async function GET() {
   try {
-    const [rows] = await pool.execute(
+    const connection = await pool.getConnection();
+    
+    const [rows] = await connection.execute(
       `SELECT 
         peminjaman.id,
         peminjaman.tanggal_pinjam,
@@ -17,12 +20,94 @@ export async function GET() {
        JOIN buku ON peminjaman.buku_id = buku.id
        ORDER BY peminjaman.id DESC`
     );
+    
+    connection.release();
 
-    return NextResponse.json(rows, { status: 200 });
+    return new NextResponse(JSON.stringify(rows), {
+      status: 200,
+      headers: { 'Content-Type': 'application/json' },
+    });
+
   } catch (error) {
-    return NextResponse.json(
-      { message: "Terjadi kesalahan", error: error.message },
-      { status: 500 }
+    console.error("Database Error:", error);
+    
+    return new NextResponse(
+      JSON.stringify({ 
+        success: false,
+        message: "Terjadi kesalahan saat mengambil data", 
+        error: error.message 
+      }),
+      {
+        status: 500,
+        headers: { 'Content-Type': 'application/json' },
+      }
+    );
+  }
+}
+
+// POST - Tambah peminjaman baru
+export async function POST(request) {
+  try {
+    const body = await request.json();
+    const { user_id, buku_id, tanggal_pinjam, lama_pinjam } = body;
+
+    // Validasi input
+    if (!user_id || !buku_id || !tanggal_pinjam || !lama_pinjam) {
+      return new NextResponse(
+        JSON.stringify({ 
+          success: false,
+          message: "Data tidak lengkap" 
+        }),
+        {
+          status: 400,
+          headers: { 'Content-Type': 'application/json' },
+        }
+      );
+    }
+
+    // Hitung tanggal kembali
+    const tanggalPinjam = new Date(tanggal_pinjam);
+    const tanggalKembali = new Date(tanggalPinjam);
+    tanggalKembali.setDate(tanggalPinjam.getDate() + parseInt(lama_pinjam));
+    const tanggal_kembali = tanggalKembali.toISOString().split('T')[0];
+
+    const connection = await pool.getConnection();
+
+    // Insert data peminjaman
+    const [result] = await connection.execute(
+      `INSERT INTO peminjaman 
+       (user_id, buku_id, tanggal_pinjam, tanggal_kembali, lama_pinjam, status) 
+       VALUES (?, ?, ?, ?, ?, 'pending')`,
+      [user_id, buku_id, tanggal_pinjam, tanggal_kembali, lama_pinjam]
+    );
+
+    connection.release();
+
+    return new NextResponse(
+      JSON.stringify({ 
+        success: true,
+        message: "Peminjaman berhasil diajukan",
+        id: result.insertId
+      }),
+      {
+        status: 201,
+        headers: { 'Content-Type': 'application/json' },
+      }
+    );
+
+  } catch (error) {
+    console.error("Database Error:", error);
+    
+    return new NextResponse(
+      JSON.stringify({ 
+        success: false,
+        message: "Gagal mengajukan peminjaman", 
+        error: error.message 
+      }),
+      {
+        status: 500,
+        headers: { 'Content-Type': 'application/json' },
+      }
     );
   }
 }
