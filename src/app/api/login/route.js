@@ -1,4 +1,4 @@
-import connection from "../../lib/database";
+import pool from "@/lib/database";
 import bcrypt from "bcryptjs";
 
 export async function POST(req) {
@@ -12,7 +12,7 @@ export async function POST(req) {
       });
     }
 
-    const [rows] = await connection.execute("SELECT * FROM users WHERE email = ?", [email]);
+    const [rows] = await pool.execute("SELECT * FROM users WHERE email = ?", [email]);
 
     if (rows.length === 0) {
       return new Response(JSON.stringify({ message: "Email tidak ditemukan" }), { status: 404 });

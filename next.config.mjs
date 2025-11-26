@@ -18,6 +18,10 @@ const nextConfig = {
         protocol: "https",
         hostname: "penerbitlitnus.co.id",
       },
+      {
+        protocol: "https",
+        hostname: "cdn.gramedia.com",
+      },
     ],
   },
 };

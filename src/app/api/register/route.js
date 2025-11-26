@@ -1,4 +1,4 @@
-import connection from "../../lib/database";
+import pool from "@/lib/database";
 import bcrypt from "bcryptjs"; 
 
 export async function POST(req) {
@@ -15,7 +15,7 @@ export async function POST(req) {
 
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    await connection.execute(
+    await pool.execute(
       "INSERT INTO users (nama, kelas, email, password, role) VALUES (?, ?, ?, ?, ?)",
       [nama, kelas || null, email, hashedPassword, "siswa"]
     );
