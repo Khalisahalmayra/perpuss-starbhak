@@ -68,7 +68,6 @@ export default function DashboardPage() {
       });
 
       const output = await res.json();
-      console.log("SERVER RESPONSE:", output);
 
       if (!res.ok) {
         alert("Gagal mengupdate status!\n" + (output.message || ""));

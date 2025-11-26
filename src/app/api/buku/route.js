@@ -1,3 +1,4 @@
+import pool from "@/lib/database";
 import connection from "@/lib/database";
 
 export async function GET(req) {
@@ -8,7 +9,7 @@ export async function GET(req) {
     let query = "SELECT * FROM buku ORDER BY id DESC";
     if (limit) query += ` LIMIT ${parseInt(limit)}`;
 
-    const [rows] = await connection.execute(query);
+    const [rows] = await pool.execute(query);
 
     return new Response(JSON.stringify(rows), {
       status: 200,
@@ -34,7 +35,7 @@ export async function POST(req) {
 
     console.log("DATA POST:", body);
 
-    await connection.execute(
+    await pool.execute(
       `INSERT INTO buku (img, judul, penulis, penerbit, tahun_terbit, stok, kategori)
        VALUES (?, ?, ?, ?, ?, ?, ?)`,
       [img, judul, penulis, penerbit, tahun_terbit, stok, kategori]

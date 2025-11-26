@@ -22,6 +22,10 @@ const nextConfig = {
         protocol: "https",
         hostname: "cdn.gramedia.com",
       },
+      {
+        protocol: "https",
+        hostname: "www.samudrabiru.co.id",
+      },
     ],
   },
 };

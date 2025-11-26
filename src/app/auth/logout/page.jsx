@@ -19,7 +19,7 @@ export default function LogoutPage() {
       <div className="bg-white rounded-xl shadow-xl p-10 text-center w-[550px]">
 
         <div className="flex justify-center mb-5">
-          <Image src="/user-icon.png" alt="user" width={90} height={90} />
+          <Image src="/profile.jpg" alt="user" width={90} height={90} />
         </div>
 
         <h2 className="text-[18px] font-semibold mb-6">

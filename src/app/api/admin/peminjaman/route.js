@@ -1,9 +1,9 @@
-import connection from "@/lib/database";
+import pool from "@/lib/database";
 import { NextResponse } from "next/server";
 
 export async function GET() {
   try {
-    const [rows] = await connection.execute(`
+    const [rows] = await pool.execute(`
       SELECT 
         p.id,
         p.status,

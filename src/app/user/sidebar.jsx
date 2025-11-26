@@ -91,7 +91,7 @@ export default function Sidebar() {
 
       </nav>
 
-      <Link href="/logout">
+      <Link href="/auth/logout">
         <button className="flex items-center gap-2 text-red-500 font-semibold hover:text-red-600 mt-6 text-[15px] transition">
           <LogOut size={18} /> Logout
         </button>

@@ -6,10 +6,12 @@ export async function PATCH(req, { params }) {
     const { id } = params;
     const { status } = await req.json();
 
+
     const [result] = await pool.execute(
       "UPDATE peminjaman SET status = ? WHERE id = ?",
       [status, id]
     );
+    
 
     return NextResponse.json(
       { message: "Status berhasil diperbarui", result },
