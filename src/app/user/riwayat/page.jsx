@@ -7,6 +7,7 @@ import { IoSearch } from "react-icons/io5";
 
 export default function RiwayatPage() {
   const [riwayatData, setRiwayatData] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   const convertToISO = (tgl) => {
     if (/^\d{4}-\d{2}-\d{2}$/.test(tgl)) return tgl;
@@ -20,23 +21,70 @@ export default function RiwayatPage() {
   };
 
   useEffect(() => {
-    const data = JSON.parse(localStorage.getItem("riwayat_pinjam") || "[]");
+    const fetchRiwayat = async () => {
+      try {
+        // Ambil user yang login
+        const userStr = localStorage.getItem("user");
+        if (!userStr) {
+          console.log("User belum login");
+          setLoading(false);
+          return;
+        }
 
-    const updated = data.map((item) => {
-      const today = new Date();
-      const iso = convertToISO(item.batasKembali);
-      const batas = new Date(iso + "T00:00:00");
+        const currentUser = JSON.parse(userStr);
+        console.log("👤 Current user:", currentUser);
 
-      const diffMs = batas - today;
-      const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+        // Fetch data dari API
+        const res = await fetch("/api/peminjaman", {
+          cache: "no-store",
+        });
 
-      return {
-        ...item,
-        sisaHari: diffDays >= 0 ? diffDays : 0,
-      };
-    });
+        if (!res.ok) {
+          console.error("Gagal fetch data");
+          setLoading(false);
+          return;
+        }
 
-    setRiwayatData(updated);
+        const allData = await res.json();
+        console.log("📚 All data:", allData);
+
+        // Filter hanya peminjaman user yang login
+        const userPeminjaman = allData.filter(
+          (item) => item.user_id === currentUser.id
+        );
+
+        console.log("✅ User peminjaman:", userPeminjaman);
+
+        // Hitung sisa hari
+        const updated = userPeminjaman.map((item) => {
+          const today = new Date();
+          const iso = convertToISO(item.tanggal_kembali);
+          const batas = new Date(iso + "T00:00:00");
+
+          const diffMs = batas - today;
+          const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+
+          return {
+            id: item.id,
+            img: item.buku_img || "/default-book.png",
+            title: item.buku_judul,
+            author: item.buku_penulis || "-",
+            tanggalPinjam: new Date(item.tanggal_pinjam).toLocaleDateString("id-ID"),
+            batasKembali: new Date(item.tanggal_kembali).toLocaleDateString("id-ID"),
+            status: item.status,
+            sisaHari: diffDays >= 0 ? diffDays : 0,
+          };
+        });
+
+        setRiwayatData(updated);
+      } catch (error) {
+        console.error("Error:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchRiwayat();
   }, []);
 
   const StatusBadge = ({ status }) => {
@@ -45,7 +93,7 @@ export default function RiwayatPage() {
     if (status === "pending") color = "bg-yellow-400 text-black";
     if (status === "dipinjam") color = "bg-blue-500 text-white";
     if (status === "ditolak") color = "bg-red-500 text-white";
-    if (status === "selesai") color = "bg-green-500 text-white";
+    if (status === "dikembalikan") color = "bg-green-500 text-white";
 
     return (
       <span className={`px-3 py-1 text-xs rounded-full font-semibold ${color}`}>
@@ -68,7 +116,11 @@ export default function RiwayatPage() {
           <IoSearch className="text-lg" />
         </div>
 
-        {riwayatData.length === 0 && (
+        {loading && (
+          <p className="text-gray-600">Memuat riwayat peminjaman...</p>
+        )}
+
+        {!loading && riwayatData.length === 0 && (
           <p className="text-gray-600">Belum ada riwayat peminjaman.</p>
         )}
 
@@ -76,7 +128,7 @@ export default function RiwayatPage() {
           <div key={index} className="flex gap-5 items-start mb-8">
 
             <Image
-              src={item.img || "/default-book.png"}
+              src={item.img}
               width={110}
               height={160}
               alt="Cover Buku"
@@ -88,7 +140,7 @@ export default function RiwayatPage() {
               <div className="flex items-center gap-3 mb-1">
                 <h3 className="font-semibold text-[16px]">{item.title}</h3>
 
-                <StatusBadge status={item.status || "pending"} />
+                <StatusBadge status={item.status} />
               </div>
 
               <p className="text-gray-600">{item.author}</p>

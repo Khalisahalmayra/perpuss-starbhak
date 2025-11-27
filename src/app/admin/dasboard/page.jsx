@@ -145,23 +145,41 @@ export default function DashboardPage() {
           <p className="text-sm text-gray-500 text-center">Memuat data...</p>
         ) : (
           <div className="space-y-4">
-            {peminjaman.map((item) => (
+            {peminjaman.map((item, index) => (
               <div
                 key={item.id}
-                className="p-3 border rounded flex items-center gap-4"
+                className="p-4 border rounded flex items-center gap-4"
               >
+                {/* Nomor urut */}
+                <div className="flex items-center justify-center w-8 h-8 bg-gray-200 rounded-full font-bold text-sm">
+                  {index + 1}
+                </div>
+
+                {/* Gambar buku */}
                 <Image
                   src={item.buku_img || "/no-book.jpg"}
                   alt="foto buku"
-                  width={45}
-                  height={45}
-                  className="object-cover"
+                  width={50}
+                  height={50}
+                  className="object-cover rounded"
                 />
 
-                <div>
-                  <p className="text-sm font-medium">
+                {/* Info buku dan peminjam */}
+                <div className="flex-1">
+                  <p className="text-sm font-semibold">
                     {item.buku_judul || "Judul tidak tersedia"}
                   </p>
+                  
+                  <div className="flex items-center gap-3 mt-1 text-xs text-gray-600">
+                    <span>
+                      <strong>Nama:</strong> {item.user_nama || "-"}
+                    </span>
+                    <span>•</span>
+                    <span>
+                      <strong>Kelas:</strong> {item.user_kelas || "-"}
+                    </span>
+                  </div>
+
                   <p className="text-xs mt-1">
                     Status:{" "}
                     <span
@@ -180,18 +198,19 @@ export default function DashboardPage() {
                   </p>
                 </div>
 
+                {/* Tombol aksi */}
                 {item.status === "pending" && (
-                  <div className="ml-auto flex gap-2">
+                  <div className="flex gap-2">
                     <button
                       onClick={() => openModal(item, "ambil")}
-                      className="text-xs p-2 bg-blue-200 rounded hover:bg-blue-300"
+                      className="text-xs px-3 py-2 bg-blue-200 rounded hover:bg-blue-300 whitespace-nowrap"
                     >
                       Konfirmasi Ambil
                     </button>
 
                     <button
                       onClick={() => openModal(item, "tolak")}
-                      className="text-xs p-2 bg-red-200 text-red-700 rounded hover:bg-red-300"
+                      className="text-xs px-3 py-2 bg-red-200 text-red-700 rounded hover:bg-red-300"
                     >
                       Tolak
                     </button>
@@ -201,7 +220,7 @@ export default function DashboardPage() {
                 {item.status === "dipinjam" && (
                   <button
                     onClick={() => openModal(item, "kembali")}
-                    className="ml-auto text-xs p-2 bg-green-200 text-green-700 rounded hover:bg-green-300"
+                    className="text-xs px-3 py-2 bg-green-200 text-green-700 rounded hover:bg-green-300 whitespace-nowrap"
                   >
                     Tandai Sudah Dikembalikan
                   </button>
@@ -238,6 +257,12 @@ export default function DashboardPage() {
             <p className="text-sm">
               Atas nama: <b>{modalData.user_nama || "Tidak diketahui"}</b>
             </p>
+
+            {modalData.user_kelas && (
+              <p className="text-sm text-gray-600">
+                Kelas: <b>{modalData.user_kelas}</b>
+              </p>
+            )}
 
             {modalData.action === "tolak" && (
               <p className="text-xs text-red-600 mt-2">

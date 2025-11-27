@@ -45,6 +45,10 @@ export default function Login() {
         });
       }
 
+      // Clear localStorage untuk user sebelumnya
+      localStorage.clear();
+
+      // Simpan user baru
       localStorage.setItem("user", JSON.stringify(data.user));
 
       setMessage({

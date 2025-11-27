@@ -41,11 +41,22 @@ export default function PinjamBukuPage() {
 
   const handleKonfirmasi = async () => {
     try {
+      // Ambil user yang sedang login dari localStorage
+      const userStr = localStorage.getItem("user");
+      if (!userStr) {
+        alert("Anda harus login terlebih dahulu!");
+        router.push("/login");
+        return;
+      }
+
+      const currentUser = JSON.parse(userStr);
+      console.log("👤 User yang login:", currentUser);
+
       const res = await fetch("/api/peminjaman", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          user_id: 1, 
+          user_id: currentUser.id, // ✅ Pakai ID user yang login
           buku_id: buku.id,
           tanggal_pinjam: today.toISOString().split("T")[0],
           lama_pinjam: hari,
@@ -55,9 +66,11 @@ export default function PinjamBukuPage() {
       const data = await res.json();
 
       if (!res.ok) {
-        console.log("Gagal mengajukan peminjaman:", data.message);
+        alert("Gagal mengajukan peminjaman: " + data.message);
         return;
       }
+
+      console.log("✅ Peminjaman berhasil:", data);
 
       const dataPinjam = {
         id: buku.id,
@@ -93,6 +106,7 @@ export default function PinjamBukuPage() {
 
     } catch (error) {
       console.error("Terjadi kesalahan:", error);
+      alert("Terjadi kesalahan saat meminjam buku!");
     }
   };
 

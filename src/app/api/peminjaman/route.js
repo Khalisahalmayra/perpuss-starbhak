@@ -9,12 +9,18 @@ export async function GET() {
     const [rows] = await connection.execute(
       `SELECT 
         peminjaman.id,
+        peminjaman.user_id,
+        peminjaman.buku_id,
         peminjaman.tanggal_pinjam,
         peminjaman.tanggal_kembali,
         peminjaman.lama_pinjam,
         peminjaman.status,
-        users.nama AS nama_user,
-        buku.judul AS judul_buku
+        users.nama AS user_nama,
+        users.kelas AS user_kelas,
+        users.email AS user_email,
+        buku.judul AS buku_judul,
+        buku.img AS buku_img,
+        buku.penulis AS buku_penulis
        FROM peminjaman
        JOIN users ON peminjaman.user_id = users.id
        JOIN buku ON peminjaman.buku_id = buku.id
@@ -51,6 +57,8 @@ export async function POST(request) {
     const body = await request.json();
     const { user_id, buku_id, tanggal_pinjam, lama_pinjam } = body;
 
+    console.log("📝 Data peminjaman:", { user_id, buku_id, tanggal_pinjam, lama_pinjam });
+
     // Validasi input
     if (!user_id || !buku_id || !tanggal_pinjam || !lama_pinjam) {
       return new NextResponse(
@@ -82,6 +90,8 @@ export async function POST(request) {
     );
 
     connection.release();
+
+    console.log("✅ Peminjaman berhasil dengan ID:", result.insertId);
 
     return new NextResponse(
       JSON.stringify({ 

@@ -9,8 +9,8 @@ export async function PATCH(req, { params }) {
     const body = await req.json();
     const status = body.status;
     
-    console.log("📌 ID:", id, "Type:", typeof id);
-    console.log("📝 Status:", status, "Type:", typeof status);
+    console.log("📌 ID:", id);
+    console.log("📝 Status:", status);
 
     if (!status) {
       return new NextResponse(
