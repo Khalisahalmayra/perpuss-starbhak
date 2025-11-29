@@ -4,6 +4,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { signIn } from "next-auth/react";
 
 export default function Login() {
   const router = useRouter();
@@ -14,11 +15,7 @@ export default function Login() {
   });
 
   const [loading, setLoading] = useState(false);
-
-  const [message, setMessage] = useState({
-    text: "",
-    type: "", 
-  });
+  const [message, setMessage] = useState({ text: "", type: "" });
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -27,58 +24,40 @@ export default function Login() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
-    setMessage({ text: "", type: "" });
 
     try {
-      const res = await fetch("/api/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(form),
+      const result = await signIn("credentials", {
+        email: email,
+        password: password,
+        redirect: false, // PENTING!
       });
 
-      const data = await res.json();
+      console.log("SignIn result:", result);
 
-      if (!res.ok) {
-        return setMessage({
-          text: data.message || "Login gagal",
-          type: "error",
-        });
+      if (result?.error) {
+        alert("Login gagal: " + result.error);
+        setLoading(false);
+        return;
       }
 
-      // Clear localStorage untuk user sebelumnya
-      localStorage.clear();
-
-      // Simpan user baru
-      localStorage.setItem("user", JSON.stringify(data.user));
-
-      setMessage({
-        text: "Login berhasil! Mengarahkan...",
-        type: "success",
-      });
-
-      setTimeout(() => {
-        if (data.user.role === "admin") {
-          router.push("/admin/dasboard");
-        } else if (data.user.role === "siswa") {
-          router.push("/user/home");
-        } else {
-          setMessage({
-            text: "Role tidak dikenal. Hubungi admin.",
-            type: "error",
-          });
-        }
-      }, 800);
+      if (result?.ok) {
+        // Tunggu sebentar untuk JWT processing
+        await new Promise(resolve => setTimeout(resolve, 500));
+        
+        // Refresh untuk trigger middleware
+        router.refresh();
+        
+        // Redirect akan di-handle oleh middleware
+        window.location.href = "/admin"; // atau biarkan middleware handle
+      }
     } catch (error) {
-      console.error("Error login:", error);
-      setMessage({ text: "Terjadi kesalahan server", type: "error" });
-    } finally {
+      console.error("Login error:", error);
       setLoading(false);
     }
   };
-
+  
   return (
     <div className="min-h-screen flex flex-col md:flex-row bg-white">
-
       <div className="md:w-4/12 w-full flex items-center justify-center bg-gray-50 p-8">
         <Image
           src="/Group 29.png"

@@ -1,21 +1,43 @@
 "use client";
 
+import { useSession, signIn } from "next-auth/react";
 import { useEffect, useState } from "react";
 import AdminSidebar from "@/app/components/AdminSidebar";
 import Image from "next/image";
 
 export default function DashboardPage() {
+  const { data: session, status } = useSession();
+
   const [peminjaman, setPeminjaman] = useState([]);
   const [buku, setBuku] = useState([]);
   const [showModal, setShowModal] = useState(false);
   const [modalData, setModalData] = useState(null);
   const [loading, setLoading] = useState(true);
 
+  // Protection: jika belum login
+  if (status === "loading") {
+    return (
+      <div className="flex justify-center items-center h-screen text-gray-600">
+        Memeriksa sesi login...
+      </div>
+    );
+  }
+
+  if (status === "unauthenticated") {
+    // Redirect manual
+    signIn(); 
+    return null;
+  }
+
+  // OPTIONAL: Jika hanya admin boleh membuka halaman ini
+  // if (session?.user?.role !== "admin") {
+  //   return <p className="p-8">Akses ditolak. Halaman ini untuk admin.</p>;
+  // }
+
+  // =============================== API FETCH ===============================
   const fetchPeminjaman = async () => {
     try {
-      const res = await fetch("/api/admin/peminjaman", {
-        cache: "no-store",
-      });
+      const res = await fetch("/api/admin/peminjaman", { cache: "no-store" });
       const data = await res.json();
       setPeminjaman(Array.isArray(data) ? data : data.data || []);
     } catch (error) {
@@ -42,6 +64,7 @@ export default function DashboardPage() {
     fetchBuku();
   }, []);
 
+  // =============================== MODAL HANDLER ===============================
   const openModal = (item, action) => {
     setModalData({ ...item, action });
     setShowModal(true);
@@ -63,7 +86,6 @@ export default function DashboardPage() {
       const res = await fetch(`/api/admin/peminjaman/${modalData.id}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        cache: "no-store",
         body: JSON.stringify({ status: newStatus }),
       });
 
@@ -82,7 +104,6 @@ export default function DashboardPage() {
     }
   };
 
-  // --- Hitung statistik ---
   const totalDipinjam = peminjaman.filter((p) => p.status === "dipinjam").length;
   const totalBelumDikembalikan = totalDipinjam;
   const totalSudahDikembalikan = peminjaman.filter(
@@ -94,29 +115,22 @@ export default function DashboardPage() {
     0
   );
 
+  // =============================== UI START ===============================
   return (
     <div className="flex bg-white relative">
       <AdminSidebar />
 
       <div className="flex-1 p-8">
-        <div className="flex justify-between items-center mb-6">
-          <div className="relative w-96">
-            <input
-              type="text"
-              placeholder="Search"
-              className="border px-4 py-2 w-full rounded-md"
-            />
-            <span className="absolute right-3 top-2.5"></span>
-          </div>
-        </div>
-
         <div className="bg-blue-200 p-5 rounded-lg mb-6">
-          <h2 className="font-bold text-lg">SELAMAT DATANG, ADMIN!</h2>
+          <h2 className="font-bold text-lg">
+            SELAMAT DATANG, {session?.user?.nama || "ADMIN"}!
+          </h2>
           <p className="text-sm mt-1">
             Kelola data perpustakaan dengan mudah dan efisien.
           </p>
         </div>
 
+        {/* STATISTIK */}
         <div className="grid grid-cols-4 gap-4 mb-8">
           <div className="p-4 border rounded-lg bg-yellow-100">
             <p className="text-xs text-gray-600">Total Buku Dipinjam</p>
@@ -139,6 +153,7 @@ export default function DashboardPage() {
           </div>
         </div>
 
+        {/* LIST PEMINJAMAN */}
         <h3 className="font-semibold mb-4">Aktivitas</h3>
 
         {loading ? (
@@ -150,12 +165,10 @@ export default function DashboardPage() {
                 key={item.id}
                 className="p-4 border rounded flex items-center gap-4"
               >
-                {/* Nomor urut */}
                 <div className="flex items-center justify-center w-8 h-8 bg-gray-200 rounded-full font-bold text-sm">
                   {index + 1}
                 </div>
 
-                {/* Gambar buku */}
                 <Image
                   src={item.buku_img || "/no-book.jpg"}
                   alt="foto buku"
@@ -164,12 +177,11 @@ export default function DashboardPage() {
                   className="object-cover rounded"
                 />
 
-                {/* Info buku dan peminjam */}
                 <div className="flex-1">
                   <p className="text-sm font-semibold">
                     {item.buku_judul || "Judul tidak tersedia"}
                   </p>
-                  
+
                   <div className="flex items-center gap-3 mt-1 text-xs text-gray-600">
                     <span>
                       <strong>Nama:</strong> {item.user_nama || "-"}
@@ -198,7 +210,6 @@ export default function DashboardPage() {
                   </p>
                 </div>
 
-                {/* Tombol aksi */}
                 {item.status === "pending" && (
                   <div className="flex gap-2">
                     <button
@@ -227,16 +238,11 @@ export default function DashboardPage() {
                 )}
               </div>
             ))}
-
-            {peminjaman.length === 0 && (
-              <p className="text-gray-600 text-sm text-center">
-                Tidak ada aktivitas peminjaman.
-              </p>
-            )}
           </div>
         )}
       </div>
 
+      {/* MODAL */}
       {showModal && modalData && (
         <div className="fixed inset-0 bg-black bg-opacity-40 flex justify-center items-center z-50">
           <div className="bg-white w-[400px] p-6 rounded-xl shadow-lg text-center">

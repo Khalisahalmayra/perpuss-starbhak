@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import AdminSidebar from "@/app/components/AdminSidebar";
 import Image from "next/image";
+// import { signOut } from "next-auth/react"
 
 export default function BukuPage() {
   const [bukuList, setBukuList] = useState([]);
@@ -101,6 +102,7 @@ export default function BukuPage() {
 
       <div className="flex-1 p-8">
         <h2 className="text-xl font-bold mb-4">Daftar Buku</h2>
+        {/* <button onClick={ signOut }>logout</button> */}
 
         {toast && (
           <div className={`fixed top-4 right-4 px-4 py-2 rounded text-white shadow-lg

@@ -1,5 +1,5 @@
 import pool from "@/lib/database";
-import bcrypt from "bcryptjs"; 
+import bcrypt from "bcryptjs";
 
 export async function POST(req) {
   try {
@@ -7,36 +7,39 @@ export async function POST(req) {
     const { nama, kelas, email, password } = body;
 
     if (!nama || !email || !password) {
-      return new Response(
-        JSON.stringify({ message: "Data tidak lengkap" }),
+      return Response.json(
+        { message: "Semua field wajib diisi!" },
         { status: 400 }
       );
     }
 
-    const hashedPassword = await bcrypt.hash(password, 10);
-
-    await pool.execute(
-      "INSERT INTO users (nama, kelas, email, password, role) VALUES (?, ?, ?, ?, ?)",
-      [nama, kelas || null, email, hashedPassword, "siswa"]
+    const [exists] = await pool.execute(
+      "SELECT id FROM users WHERE email = ?",
+      [email]
     );
 
-    return new Response(
-      JSON.stringify({ message: "Registrasi berhasil" }),
-      { status: 201 }
-    );
-
-  } catch (error) {
-    console.error("Error register:", error);
-
-    if (error.code === "ER_DUP_ENTRY") {
-      return new Response(
-        JSON.stringify({ message: "Email sudah terdaftar" }),
-        { status: 409 }
+    if (exists.length > 0) {
+      return Response.json(
+        { message: "Email sudah digunakan!" },
+        { status: 400 }
       );
     }
 
-    return new Response(
-      JSON.stringify({ message: "Terjadi kesalahan server" }),
+    const hashed = await bcrypt.hash(password, 10);
+
+    await pool.execute(
+      "INSERT INTO users (nama, kelas, email, password, role) VALUES (?, ?, ?, ?, 'siswa')",
+      [nama, kelas, email, hashed]
+    );
+
+    return Response.json(
+      { message: "Registrasi berhasil!" },
+      { status: 200 }
+    );
+  } catch (e) {
+    console.error(e);
+    return Response.json(
+      { message: "Server error" },
       { status: 500 }
     );
   }

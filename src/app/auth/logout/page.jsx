@@ -1,17 +1,65 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 import Image from "next/image";
 
 export default function LogoutPage() {
   const router = useRouter();
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(false);
 
-  const handleLogout = () => {
-    router.push("/"); 
+  // Ambil data user
+  useEffect(() => {
+    const fetchUser = async () => {
+      try {
+        const res = await fetch("/api/user", {
+          credentials: "include",
+        });
+
+        if (res.ok) {
+          const data = await res.json();
+          setUser(data.user);
+        }
+      } catch (error) {
+        console.error("Error fetching user:", error);
+      }
+    };
+
+    fetchUser();
+  }, []);
+
+  const handleLogout = async () => {
+    setLoading(true);
+
+    try {
+      const res = await fetch("/api/logout", {
+        method: "POST",
+        credentials: "include",
+      });
+
+      if (res.ok) {
+        console.log("✅ Logout berhasil");
+
+        router.push("/auth/Login");
+        router.refresh();
+      } else {
+        alert("Gagal logout, coba lagi");
+      }
+    } catch (error) {
+      console.error("Error logout:", error);
+      alert("Terjadi kesalahan saat logout");
+    } finally {
+      setLoading(false);
+    }
   };
 
   const cancelLogout = () => {
-    router.back(); 
+    if (user?.role === "admin") {
+      router.push("/admin/dashboard"); // ✔ sudah diperbaiki
+    } else {
+      router.push("/user/home");
+    }
   };
 
   return (
@@ -19,8 +67,31 @@ export default function LogoutPage() {
       <div className="bg-white rounded-xl shadow-xl p-10 text-center w-[550px]">
 
         <div className="flex justify-center mb-5">
-          <Image src="/profile.jpg" alt="user" width={90} height={90} />
+          <div className="w-[90px] h-[90px] rounded-full bg-gray-200 flex items-center justify-center overflow-hidden">
+            {user?.img ? (
+              <Image 
+                src={user.img} 
+                alt="user" 
+                width={90} 
+                height={90}
+                className="object-cover"
+              />
+            ) : (
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 24 24"
+                fill="currentColor"
+                className="w-12 h-12 text-gray-500"
+              >
+                <path d="M12 12c2.7 0 5-2.3 5-5s-2.3-5-5-5-5 2.3-5 5 2.3 5 5 5zm0 2c-3.3 0-10 1.7-10 5v3h20v-3c0-3.3-6.7-5-10-5z" />
+              </svg>
+            )}
+          </div>
         </div>
+
+        {user && (
+          <p className="text-sm text-gray-600 mb-2">{user.nama}</p>
+        )}
 
         <h2 className="text-[18px] font-semibold mb-6">
           Kamu yakin ingin keluar dari akun sekarang?
@@ -29,14 +100,20 @@ export default function LogoutPage() {
         <div className="flex items-center justify-center gap-4 mt-4">
           <button
             onClick={handleLogout}
-            className="px-6 py-2 border border-gray-700 rounded-md hover:bg-gray-200 transition"
+            disabled={loading}
+            className={`px-6 py-2 rounded-md transition font-medium ${
+              loading 
+                ? "bg-gray-300 text-gray-500 cursor-not-allowed" 
+                : "border border-gray-700 hover:bg-gray-200"
+            }`}
           >
-            Iya, keluar sekarang
+            {loading ? "Memproses..." : "Iya, keluar sekarang"}
           </button>
 
           <button
             onClick={cancelLogout}
-            className="px-10 py-2 border border-gray-400 rounded-md hover:bg-gray-200 transition"
+            disabled={loading}
+            className="px-10 py-2 border border-gray-400 rounded-md hover:bg-gray-200 transition font-medium"
           >
             Tidak
           </button>

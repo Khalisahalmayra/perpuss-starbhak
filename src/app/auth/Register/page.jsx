@@ -3,6 +3,7 @@
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { signIn } from "next-auth/react";
 
 export default function Register() {
   const router = useRouter();
@@ -16,7 +17,7 @@ export default function Register() {
 
   const [message, setMessage] = useState({
     text: "",
-    type: "", 
+    type: "",
   });
 
   const [loading, setLoading] = useState(false);
@@ -31,6 +32,7 @@ export default function Register() {
     setMessage({ text: "", type: "" });
 
     try {
+      // === 1. SIMPAN DATA KE DATABASE ===
       const res = await fetch("/api/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -39,17 +41,44 @@ export default function Register() {
 
       const data = await res.json();
 
-      if (res.ok) {
-        setMessage({ text: "Registrasi berhasil! Mengarahkan...", type: "success" });
-
-        setTimeout(() => {
-          router.push("/user/home");
-        }, 800);
-      } else {
-        setMessage({ text: data.message || "Gagal register", type: "error" });
+      if (!res.ok) {
+        setLoading(false);
+        return setMessage({
+          text: data.message || "Gagal register",
+          type: "error",
+        });
       }
+
+      setMessage({
+        text: "Registrasi berhasil! Melakukan login...",
+        type: "success",
+      });
+
+      // === 2. AUTO LOGIN MENGGUNAKAN NEXTAUTH ===
+      const loginResult = await signIn("credentials", {
+        redirect: false,
+        email: form.email,
+        password: form.password,
+      });
+
+      if (loginResult?.error) {
+        setMessage({
+          text: "Akun berhasil dibuat tetapi gagal login otomatis.",
+          type: "error",
+        });
+        return;
+      }
+
+      // === 3. REDIRECT KE DASHBOARD ===
+      setTimeout(() => {
+        router.push("/user/home");
+      }, 800);
     } catch (err) {
-      setMessage({ text: "Terjadi kesalahan server", type: "error" });
+      console.error("Error register:", err);
+      setMessage({
+        text: "Terjadi kesalahan server",
+        type: "error",
+      });
     } finally {
       setLoading(false);
     }
@@ -57,7 +86,6 @@ export default function Register() {
 
   return (
     <div className="min-h-screen flex flex-col md:flex-row bg-white">
-
       <div className="md:w-4/12 w-full flex items-center justify-center bg-gray-50 p-8">
         <Image
           src="/Group 29.png"
@@ -92,7 +120,8 @@ export default function Register() {
             placeholder="Nama lengkap"
             value={form.nama}
             onChange={handleChange}
-            className="w-full border border-gray-300 rounded-lg px-4 py-2 mb-3 focus:outline-blue-600"
+            required
+            className="w-full border border-gray-300 rounded-lg px-4 py-2 mb-3"
           />
 
           <input
@@ -101,16 +130,17 @@ export default function Register() {
             placeholder="Kelas (opsional)"
             value={form.kelas}
             onChange={handleChange}
-            className="w-full border border-gray-300 rounded-lg px-4 py-2 mb-3 focus:outline-blue-600"
+            className="w-full border border-gray-300 rounded-lg px-4 py-2 mb-3"
           />
 
           <input
             type="email"
             name="email"
-            placeholder="Email..."
+            placeholder="Email"
             value={form.email}
             onChange={handleChange}
-            className="w-full border border-gray-300 rounded-lg px-4 py-2 mb-3 focus:outline-blue-600"
+            required
+            className="w-full border border-gray-300 rounded-lg px-4 py-2 mb-3"
           />
 
           <input
@@ -119,14 +149,17 @@ export default function Register() {
             placeholder="Password"
             value={form.password}
             onChange={handleChange}
-            className="w-full border border-gray-300 rounded-lg px-4 py-2 mb-5 focus:outline-blue-600"
+            required
+            className="w-full border border-gray-300 rounded-lg px-4 py-2 mb-5"
           />
 
           <button
             type="submit"
             disabled={loading}
             className={`w-full rounded-lg py-2 font-semibold text-white transition ${
-              loading ? "bg-gray-500 cursor-not-allowed" : "bg-black hover:bg-gray-800"
+              loading
+                ? "bg-gray-500 cursor-not-allowed"
+                : "bg-black hover:bg-gray-800"
             }`}
           >
             {loading ? "Memproses..." : "Daftar Sekarang"}

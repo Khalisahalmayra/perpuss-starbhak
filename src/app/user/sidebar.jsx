@@ -12,14 +12,38 @@ import {
 export default function Sidebar() {
   const pathname = usePathname();
   const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
 
   const isActive = (path) =>
     pathname === path ? "bg-gray-200" : "";
 
   useEffect(() => {
-    const data = localStorage.getItem("user");
-    if (data) setUser(JSON.parse(data));
+    const fetchUser = async () => {
+      try {
+        const res = await fetch("/api/user", {
+          credentials: "include",
+          cache: "no-store",
+        });
+
+        if (res.ok) {
+          const data = await res.json();
+          setUser(data.user);
+        } else {
+          setUser(null);
+        }
+      } catch (err) {
+        console.error("Error sidebar user:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchUser();
   }, []);
+
+  if (!user) {
+    console.log ("403")
+  }
 
   return (
     <aside className="w-75 border-r border-gray-200 p-6 flex flex-col min-h-screen bg-white">
@@ -43,10 +67,10 @@ export default function Sidebar() {
         />
         <div>
           <p className="font-semibold text-[14px]">
-            {user?.nama || "Loading..."}
+            {loading ? "Loading..." : user?.nama || "Pengguna"}
           </p>
           <span className="text-[11px] bg-blue-600 text-white px-2 py-1 rounded">
-            {user?.kelas || "Kelas tidak ada"}
+            {loading ? "…" : user?.kelas || "Tidak ada kelas"}
           </span>
         </div>
       </div>

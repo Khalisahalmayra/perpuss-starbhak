@@ -62,10 +62,10 @@ export default function AdminSidebar() {
           </div>
         </Link>
 
-        <Link href="/admin/logout">
+        <Link href="/auth/logout">
           <div
             className={`flex items-center gap-3 p-3 rounded cursor-pointer hover:bg-gray-100
-            ${pathname === "/admin/logout" ? "bg-gray-200" : ""}`}
+            ${pathname === "/auth/logout" ? "bg-gray-200" : ""}`}
           >
             <LogOut size={18} />
             <p className="font-medium">Logout</p>

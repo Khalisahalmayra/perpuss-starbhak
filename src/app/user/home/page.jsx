@@ -9,44 +9,84 @@ import { useEffect, useState } from "react";
 export default function HomePage() {
   const [bukuList, setBukuList] = useState([]);
   const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [isClient, setIsClient] = useState(false);
 
-  // Ambil data user dari localStorage
+  // Deteksi client untuk mencegah hydration mismatch
   useEffect(() => {
-    const data = localStorage.getItem("user");
-    if (data) setUser(JSON.parse(data));
+    setIsClient(true);
+  }, []);
+
+  // Ambil data user dari API session
+  useEffect(() => {
+    const fetchUser = async () => {
+      try {
+        const res = await fetch("/api/user", { credentials: "include" });
+
+        if (res.ok) {
+          const data = await res.json();
+
+          setUser({
+            nama: data.user?.nama || "Pengguna",
+            kelas: data.user?.kelas || "Tidak ada",
+            email: data.user?.email || "",
+            role: data.user?.role || "",
+          });
+        }
+      } catch (error) {
+        console.error("Error fetch user:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchUser();
   }, []);
 
   // Ambil buku terbaru
   useEffect(() => {
     const fetchBuku = async () => {
-      const res = await fetch("/api/buku?limit=5");
-      const data = await res.json();
-      setBukuList(data);
+      try {
+        const res = await fetch("/api/buku?limit=5");
+        const data = await res.json();
+        setBukuList(Array.isArray(data) ? data : []);
+      } catch (error) {
+        console.error("Error fetching buku:", error);
+        setBukuList([]);
+      }
     };
+
     fetchBuku();
   }, []);
 
   return (
     <div className="flex min-h-screen bg-white">
-      <Sidebar />
+      <Sidebar user={user} loading={loading} />
 
       <main className="flex-1 p-6 flex flex-col gap-6">
-
+        
         {/* Search */}
         <div className="flex items-center w-full max-w-md border border-gray-300 rounded-lg px-3 py-2">
           <input 
             type="text" 
-            placeholder="Search" 
+            placeholder="Search"
             className="flex-1 outline-none text-sm" 
           />
           <IoSearch className="text-lg" />
         </div>
 
-        {/* WELCOME DINAMIS */}
+        {/* WELCOME SECTION */}
         <div className="bg-[#5D80B6] text-white rounded-lg p-6 max-w-4xl">
           <h2 className="font-bold text-sm md:text-base">
-            SELAMAT DATANG, {user?.nama?.toUpperCase() || "Loading..."} !
+            SELAMAT DATANG,{" "}
+            {isClient 
+              ? (loading 
+                  ? "LOADING..." 
+                  : user?.nama?.toUpperCase() || "PENGGUNA")
+              : ""}
+            !
           </h2>
+
           <p className="mt-2 text-sm leading-relaxed">
             Kamu punya beberapa buku menarik untuk dijelajahi hari ini.<br />
             Yuk mulai menambah wawasanmu di Perpustakaan Starbhak.
@@ -90,7 +130,9 @@ export default function HomePage() {
                   <span className="inline-block mt-2 text-[9px] bg-blue-100 text-blue-700 px-2 py-1 rounded">
                     {book.kategori}
                   </span>
-                  <p className="text-[9px] mt-2 text-gray-500">Karya: {book.penulis}</p>
+                  <p className="text-[9px] mt-2 text-gray-500">
+                    Karya: {book.penulis}
+                  </p>
                 </Link>
               ))}
             </div>
@@ -99,7 +141,7 @@ export default function HomePage() {
           )}
         </section>
 
-        {/* Coming soon */}
+        {/* Coming Soon */}
         <div className="bg-[#5D80B6] rounded-lg p-6 flex items-center justify-between text-white">
           <div>
             <p className="font-bold text-sm md:text-base tracking-wide uppercase">
@@ -118,7 +160,6 @@ export default function HomePage() {
             className="rounded shadow-md object-cover"
           />
         </div>
-
       </main>
     </div>
   );
