@@ -1,51 +1,32 @@
 "use client";
 
+import { signOut, useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import Image from "next/image";
 
 export default function LogoutPage() {
   const router = useRouter();
-  const [user, setUser] = useState(null);
+  const { data: session } = useSession();
   const [loading, setLoading] = useState(false);
 
-  // Ambil data user
-  useEffect(() => {
-    const fetchUser = async () => {
-      try {
-        const res = await fetch("/api/user", {
-          credentials: "include",
-        });
-
-        if (res.ok) {
-          const data = await res.json();
-          setUser(data.user);
-        }
-      } catch (error) {
-        console.error("Error fetching user:", error);
-      }
-    };
-
-    fetchUser();
-  }, []);
+  const user = session?.user;
 
   const handleLogout = async () => {
     setLoading(true);
 
     try {
-      const res = await fetch("/api/logout", {
-        method: "POST",
-        credentials: "include",
+      // NextAuth signOut
+      await signOut({
+        redirect: false, // Jangan auto-redirect
+        callbackUrl: "/login", // Optional: URL setelah logout
       });
 
-      if (res.ok) {
-        console.log("✅ Logout berhasil");
+      console.log("✅ Logout berhasil");
 
-        router.push("/auth/Login");
-        router.refresh();
-      } else {
-        alert("Gagal logout, coba lagi");
-      }
+      // Manual redirect
+      router.push("/auth/Login");
+      router.refresh(); // Refresh untuk clear cache
     } catch (error) {
       console.error("Error logout:", error);
       alert("Terjadi kesalahan saat logout");
@@ -56,7 +37,7 @@ export default function LogoutPage() {
 
   const cancelLogout = () => {
     if (user?.role === "admin") {
-      router.push("/admin/dashboard"); // ✔ sudah diperbaiki
+      router.push("/admin/dasboard");
     } else {
       router.push("/user/home");
     }
@@ -68,9 +49,9 @@ export default function LogoutPage() {
 
         <div className="flex justify-center mb-5">
           <div className="w-[90px] h-[90px] rounded-full bg-gray-200 flex items-center justify-center overflow-hidden">
-            {user?.img ? (
+            {user?.image ? (
               <Image 
-                src={user.img} 
+                src={user.image} 
                 alt="user" 
                 width={90} 
                 height={90}
@@ -90,7 +71,9 @@ export default function LogoutPage() {
         </div>
 
         {user && (
-          <p className="text-sm text-gray-600 mb-2">{user.nama}</p>
+          <p className="text-sm text-gray-600 mb-2">
+            {user.name || user.nama || user.email}
+          </p>
         )}
 
         <h2 className="text-[18px] font-semibold mb-6">

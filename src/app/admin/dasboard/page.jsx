@@ -14,26 +14,6 @@ export default function DashboardPage() {
   const [modalData, setModalData] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  // Protection: jika belum login
-  if (status === "loading") {
-    return (
-      <div className="flex justify-center items-center h-screen text-gray-600">
-        Memeriksa sesi login...
-      </div>
-    );
-  }
-
-  if (status === "unauthenticated") {
-    // Redirect manual
-    signIn(); 
-    return null;
-  }
-
-  // OPTIONAL: Jika hanya admin boleh membuka halaman ini
-  // if (session?.user?.role !== "admin") {
-  //   return <p className="p-8">Akses ditolak. Halaman ini untuk admin.</p>;
-  // }
-
   // =============================== API FETCH ===============================
   const fetchPeminjaman = async () => {
     try {
@@ -59,10 +39,13 @@ export default function DashboardPage() {
     }
   };
 
+  // ✅ PINDAHKAN useEffect KE ATAS SEBELUM CONDITIONAL RETURN
   useEffect(() => {
-    fetchPeminjaman();
-    fetchBuku();
-  }, []);
+    if (status === "authenticated") {
+      fetchPeminjaman();
+      fetchBuku();
+    }
+  }, [status]);
 
   // =============================== MODAL HANDLER ===============================
   const openModal = (item, action) => {
@@ -104,6 +87,7 @@ export default function DashboardPage() {
     }
   };
 
+  // ✅ STATISTIK CALCULATION
   const totalDipinjam = peminjaman.filter((p) => p.status === "dipinjam").length;
   const totalBelumDikembalikan = totalDipinjam;
   const totalSudahDikembalikan = peminjaman.filter(
@@ -114,6 +98,20 @@ export default function DashboardPage() {
     (sum, item) => sum + Number(item.stok || 0),
     0
   );
+
+  // ✅ CONDITIONAL RENDERING DI BAWAH SETELAH SEMUA HOOKS
+  if (status === "loading") {
+    return (
+      <div className="flex justify-center items-center h-screen text-gray-600">
+        Memeriksa sesi login...
+      </div>
+    );
+  }
+
+  if (status === "unauthenticated") {
+    signIn();
+    return null;
+  }
 
   // =============================== UI START ===============================
   return (
@@ -238,6 +236,12 @@ export default function DashboardPage() {
                 )}
               </div>
             ))}
+
+            {peminjaman.length === 0 && (
+              <p className="text-gray-600 text-sm text-center">
+                Tidak ada aktivitas peminjaman.
+              </p>
+            )}
           </div>
         )}
       </div>

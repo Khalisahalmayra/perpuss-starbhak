@@ -27,8 +27,8 @@ export default function Login() {
 
     try {
       const result = await signIn("credentials", {
-        email: email,
-        password: password,
+        email: form.email,
+        password: form.password,
         redirect: false, // PENTING!
       });
 
@@ -48,7 +48,7 @@ export default function Login() {
         router.refresh();
         
         // Redirect akan di-handle oleh middleware
-        window.location.href = "/admin"; // atau biarkan middleware handle
+        window.location.href = "/user/home"; // atau biarkan middleware handle
       }
     } catch (error) {
       console.error("Login error:", error);
