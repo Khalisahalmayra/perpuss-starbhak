@@ -71,6 +71,7 @@ const handler = NextAuth({
         token.role = user.role;
       }
       return token;
+      // localStorage.setItem("role", user.)
     },
 
     async session({ session, token }) {
@@ -82,6 +83,7 @@ const handler = NextAuth({
         role: token.role,
       };
       return session;
+      
     },
 
     // ✅ PERBAIKAN 3: TAMBAHKAN callback redirect INI

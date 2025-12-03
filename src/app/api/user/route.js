@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { verifyToken } from "@/lib/jwt";
 import pool from "@/lib/database";
+import { useSession } from "next-auth/react";
 
 export async function GET(request) {
   try {

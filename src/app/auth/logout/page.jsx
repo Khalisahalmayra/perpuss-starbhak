@@ -21,7 +21,7 @@ export default function LogoutPage() {
         redirect: false, // Jangan auto-redirect
         callbackUrl: "/login", // Optional: URL setelah logout
       });
-
+      localStorage.clear()
       console.log("✅ Logout berhasil");
 
       // Manual redirect

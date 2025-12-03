@@ -8,7 +8,9 @@ export async function middleware(req) {
   const role = token?.role;
   const authPath = ["/auth/Login", "/auth/Register"];
 
-  console.log("🔍 Middleware:", { pathname, role, hasToken: !!token });
+  console.log("===================",token)
+
+  console.log("🔍 Middleware:=========================================", { pathname, role, hasToken: !!token });
 
   if (!token) return NextResponse.redirect(new URL(authPath[0], req.url));
 
