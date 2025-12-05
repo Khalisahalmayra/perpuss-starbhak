@@ -3,7 +3,6 @@
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { signIn } from "next-auth/react";
 
 export default function Register() {
   const router = useRouter();
@@ -49,30 +48,17 @@ export default function Register() {
         });
       }
 
+      // === 2. TIDAK ADA AUTO LOGIN ===
       setMessage({
-        text: "Registrasi berhasil! Melakukan login...",
+        text: "Registrasi berhasil! Silakan login untuk masuk.",
         type: "success",
       });
 
-      // === 2. AUTO LOGIN MENGGUNAKAN NEXTAUTH ===
-      const loginResult = await signIn("credentials", {
-        redirect: false,
-        email: form.email,
-        password: form.password,
-      });
-
-      if (loginResult?.error) {
-        setMessage({
-          text: "Akun berhasil dibuat tetapi gagal login otomatis.",
-          type: "error",
-        });
-        return;
-      }
-
-      // === 3. REDIRECT KE DASHBOARD ===
+      // === 3. REDIRECT OTOMATIS KE LOGIN ===
       setTimeout(() => {
-        router.push("/user/home");
-      }, 800);
+        router.push("/auth/Login");
+      }, 1200);
+
     } catch (err) {
       console.error("Error register:", err);
       setMessage({
@@ -164,6 +150,17 @@ export default function Register() {
           >
             {loading ? "Memproses..." : "Daftar Sekarang"}
           </button>
+
+          {/* === Tambahan tulisan login di sini === */}
+          <p className="text-center mt-4 text-sm text-gray-600">
+            Sudah punya akun?{" "}
+            <span
+              onClick={() => router.push("/auth/Login")}
+              className="text-blue-600 font-semibold cursor-pointer hover:underline"
+            >
+              Masuk di sini
+            </span>
+          </p>
         </form>
       </div>
     </div>

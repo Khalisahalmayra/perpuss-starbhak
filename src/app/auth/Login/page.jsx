@@ -131,7 +131,7 @@ export default function Login() {
 
           <p className="text-sm text-center mt-4">
             Belum punya akun?{" "}
-            <Link href="/user/register" className="text-blue-600 hover:underline">
+            <Link href="/auth/Register" className="text-blue-600 hover:underline">
               Daftar di sini
             </Link>
           </p>
