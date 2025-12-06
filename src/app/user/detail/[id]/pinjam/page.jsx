@@ -4,10 +4,12 @@ import { useParams, useRouter } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { useSession } from "next-auth/react";
 
 export default function PinjamBukuPage() {
   const { id } = useParams();
   const router = useRouter();
+  const { data: session } = useSession(); // Ambil user login dari NextAuth
 
   const [buku, setBuku] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -41,22 +43,21 @@ export default function PinjamBukuPage() {
 
   const handleKonfirmasi = async () => {
     try {
-      // Ambil user yang sedang login dari localStorage
-      const userStr = localStorage.getItem("user");
-      if (!userStr) {
+      // 🔍 Pastikan user sudah login (pakai NextAuth)
+      if (!session?.user) {
         alert("Anda harus login terlebih dahulu!");
-        router.push("/login");
+        router.push("/auth/Login");
         return;
       }
 
-      const currentUser = JSON.parse(userStr);
-      console.log("👤 User yang login:", currentUser);
+      const currentUser = session.user;
 
+      // 🔥 Kirim ke API peminjaman
       const res = await fetch("/api/peminjaman", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          user_id: currentUser.id, // ✅ Pakai ID user yang login
+          user_id: currentUser.id,
           buku_id: buku.id,
           tanggal_pinjam: today.toISOString().split("T")[0],
           lama_pinjam: hari,
@@ -72,6 +73,9 @@ export default function PinjamBukuPage() {
 
       console.log("✅ Peminjaman berhasil:", data);
 
+      // ===============================
+      // 📌 Simpan ke Riwayat localStorage
+      // ===============================
       const dataPinjam = {
         id: buku.id,
         img: buku.img || "/default-book.png",
@@ -87,6 +91,9 @@ export default function PinjamBukuPage() {
       riwayat.unshift(dataPinjam);
       localStorage.setItem("riwayat_pinjam", JSON.stringify(riwayat));
 
+      // ===============================
+      // 🔔 Simpan Notifikasi peminjaman
+      // ===============================
       const notifikasi = {
         id: buku.id,
         img: buku.img || "/default-book.png",
@@ -128,7 +135,7 @@ export default function PinjamBukuPage() {
           <p className="text-gray-600 mb-4">{buku.penulis}</p>
 
           <div className="mt-6 space-y-4">
-            <p><strong>Waktu Peminjaman</strong> : {formattedToday}</p>
+            <p><strong>Waktu Peminjaman:</strong> {formattedToday}</p>
 
             <div>
               <p><strong>Pilih Batas Waktu Peminjaman:</strong></p>
